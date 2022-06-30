@@ -3,7 +3,7 @@ import pytz
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from datetime import datetime
-from filters.channel import IsChannel
+from filters.filters import IsChannel, IsGroup
 
 
 from loader import dp, bot
@@ -13,7 +13,6 @@ from states.add import AddState
 
 
 @dp.message_handler(commands=['addChan'])
-# @dp.message_handler(IsChannel(), content_types=types.ContentType.NEW_CHAT_MEMBERS)
 async def addChan(message: types.Message, state: FSMContext):
     await message.answer('Ushbu pastdagi tugmani bosib kanalingizga obuna qilishingiz mumkin!', reply_markup=AddChan)
     
@@ -31,6 +30,13 @@ async def new_member(message: types.Message):
     for member in message.new_chat_members:
         if member.username == '@devboysbot':
             print(f'{member.id} - - qoshdi!')
+            
+
+@dp.message_handler(IsGroup(), content_types=types.ContentType.NEW_CHAT_MEMBERS)
+async def new_grmember(message: types.Message):
+    for member in message.new_chat_members:
+        if member.username == '@devboysbot':
+            print(f'Gruhga {member.id}, {member.username} -- qoshildi')
 
 
 @dp.message_handler(commands=['send_message'])
