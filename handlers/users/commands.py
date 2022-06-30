@@ -1,18 +1,36 @@
-from weakref import proxy
+from subprocess import call
 import pytz
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from datetime import datetime
+from filters.channel import IsChannel
 
 
 from loader import dp, bot
 from keyboards.inline.addchan import AddChan
 from states.state import MessageState
+from states.add import AddState
 
 
 @dp.message_handler(commands=['addChan'])
-async def addChan(message: types.Message):
+# @dp.message_handler(IsChannel(), content_types=types.ContentType.NEW_CHAT_MEMBERS)
+async def addChan(message: types.Message, state: FSMContext):
     await message.answer('Ushbu pastdagi tugmani bosib kanalingizga obuna qilishingiz mumkin!', reply_markup=AddChan)
+    
+    user_id = message.from_user.id
+    
+    async with state.proxy() as data:
+        data['user_id'] = user_id
+        
+    await AddState.chan_id.set()
+    
+    
+@dp.message_handler(IsChannel(), state=AddState.chan_id, content_types=types.ContentType.NEW_CHAT_MEMBERS)
+async def new_member(message: types.Message):
+    
+    for member in message.new_chat_members:
+        if member.username == '@devboysbot':
+            print(f'{member.id} - - qoshdi!')
 
 
 @dp.message_handler(commands=['send_message'])

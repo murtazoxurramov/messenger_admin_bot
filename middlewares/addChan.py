@@ -5,7 +5,7 @@ from aiogram.dispatcher.middlewares import BaseMiddleware
 
 from data.config import CHAT_ID
 from keyboards.inline.addchan import AddChan
-from utils.misc.subscribtion import check
+from utils.misc.Add import check
 from loader import bot
 
 
