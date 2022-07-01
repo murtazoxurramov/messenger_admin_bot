@@ -1,4 +1,6 @@
+from asyncio import events
 from subprocess import call
+from turtle import update
 import pytz
 from aiogram import types
 from aiogram.dispatcher import FSMContext
@@ -24,18 +26,18 @@ async def addChan(message: types.Message, state: FSMContext):
     await AddState.chan_id.set()
     
     
-@dp.message_handler(IsChannel(), state=AddState.chan_id, content_types=types.ContentType.NEW_CHAT_MEMBERS)
+@dp.message_handler(IsChannel(), content_types=types.ContentType.NEW_CHAT_MEMBERS)
 async def new_member(message: types.Message):
-    
+    print(message.chat_id)
     for member in message.new_chat_members:
-        if member.username == '@devboysbot':
+        if member.username == 'devboysbot':
             print(f'{member.id} - - qoshdi!')
             
 
 @dp.message_handler(IsGroup(), content_types=types.ContentType.NEW_CHAT_MEMBERS)
 async def new_grmember(message: types.Message):
     for member in message.new_chat_members:
-        if member.username == '@devboysbot':
+        if member.username == 'devboysbot':
             print(f'Gruhga {member.id}, {member.username} -- qoshildi')
 
 
@@ -92,7 +94,7 @@ async def get_chanID(message: types.Message, state: FSMContext):
     
     # if time == c_time:
     #     print('-1')
-    #     try:
+    #     try: 
     #         await bot.copy_message(chat_id=CHANNEL, from_chat_id=user_id, message_id=msg_id)
     #         await message.answer('Habar yuklandi!')
             

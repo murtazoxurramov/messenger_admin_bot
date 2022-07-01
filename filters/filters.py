@@ -4,13 +4,8 @@ from aiogram.dispatcher.filters import BoundFilter
 
 class IsChannel(BoundFilter):
     async def check(self, message: types.Message) -> bool:
-        # return message.chat.type in (
-        #     types.ChatType.CHANNEL,
-        # )
         return message.chat.type in (
-            types.ChatType.CHANNEL,
-            types.ChatType.is_channel,
-            
+            types.ChatType.CHANNEL,    
         )
         
 class IsGroup(BoundFilter):
