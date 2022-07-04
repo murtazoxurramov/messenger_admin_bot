@@ -1,13 +1,28 @@
+import asyncpg
 from aiogram import types
 from aiogram.dispatcher.filters.builtin import CommandStart
 
-from loader import dp
+from loader import dp, db_user
 
 
 @dp.message_handler(CommandStart())
 async def bot_start(message: types.Message):
     msg = f"Assalomu alaykum, {message.from_user.full_name}!\nBotdan foydalana olishingiz uchun /addChan orqali o'z kanalingizga admin sifatida qo'shing va habar yuborish bo'limini yoqib qo'ying!"
     await message.answer(text=msg)
+    
+    try:
+        db_user.telegram_id = message.from_user.id
+        db_user.full_name = message.from_user.full_name
+        db_user.username = message.from_user.username
+        # db_user.lang = None
+        # db_user.contact = None
+
+        await db_user.add_user()
+    except asyncpg.exceptions.UniqueViolationError:
+        await db_user.select_user(telegram_id=message.from_user.id)
+
+    
+    
     
     
 # @dp.message_handler(commands=['addChan'])

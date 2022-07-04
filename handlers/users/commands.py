@@ -1,16 +1,12 @@
-from asyncio import events
-from subprocess import call
-from turtle import update
 import pytz
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from datetime import datetime
+import asyncpg
 from filters.filters import IsChannel, IsGroup
-from aiogram.utils.deep_linking import get_start_link
-from aiogram.types.update import AllowedUpdates
 
 
-from loader import dp, bot, db
+from loader import dp, bot, db_chan, db_user
 from keyboards.inline.addchan import AddChan
 from states.state import MessageState
 from states.add import AddState
@@ -22,10 +18,12 @@ async def addChan(message: types.Message, state: FSMContext):
     await message.answer(text)
     
     user_id = message.from_user.id
+    user_name = message.from_user.username
     
     
     async with state.proxy() as data:
         data['user_id'] = user_id
+        data['user_name'] = user_name
         
     
     await AddState.chan_id.set()
@@ -34,13 +32,24 @@ async def addChan(message: types.Message, state: FSMContext):
 @dp.message_handler(state=AddState.chan_id)
 async def get_chan_forward(message: types.Message, state: FSMContext):
     chan_id = message.forward_from_chat.id
+    chan_link = message.forward_from_chat.username
     
     async with state.proxy() as data:
         data['chan_id'] = chan_id
         
-    await state.finish()
-    
-    await db.
+        try:
+            db_chan.channel_id = chan_id
+            db_chan.admin_id = data['user_id']
+            db_chan.channel_link = chan_link
+            db_chan.admin_link = data['user_name']
+            await db_chan.add_channel()
+            
+            await state.finish()
+        
+        except asyncpg.exceptions.UniqueViolationError:
+            await db_user.select_user(telegram_id=message.from_user.id)
+            
+            
     
             
 
