@@ -6,6 +6,8 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from datetime import datetime
 from filters.filters import IsChannel, IsGroup
+from aiogram.utils.deep_linking import get_start_link
+from aiogram.types.update import AllowedUpdates
 
 
 from loader import dp, bot
@@ -23,8 +25,25 @@ async def addChan(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['user_id'] = user_id
         
-    await AddState.chan_id.set()
+    print(bot.get_updates(allowed_updates=AllowedUpdates.MESSAGE + AllowedUpdates.EDITED_MESSAGE))
+        
     
+    # await message.answer('Iltimos kanalingizdan biror habar yuboring!')
+    
+    
+@dp.callback_query_handler(text='http://t.me/devboysbot?startchannel=new')
+async def send_forward_post(message: types.Message):
+    
+    await message.answer('Iltimos kanalingizdan biror habar yuboring!')
+    
+    await AddState.chan_id.set()
+
+
+@dp.message_handler(state=AddState.chan_id)
+async def get_chan_forward(message: types.Message):
+    chan_id = message.forward_from_chat.id
+    print(chan_id)
+
     
 @dp.message_handler(IsChannel(), content_types=types.ContentType.NEW_CHAT_MEMBERS)
 async def new_member(message: types.Message):
