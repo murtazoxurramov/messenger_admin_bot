@@ -6,3 +6,4 @@ class MessageState(StatesGroup):
     time = State()
     user_id = State()
     chan_id = State()
+    

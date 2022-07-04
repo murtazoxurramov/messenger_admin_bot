@@ -10,7 +10,7 @@ from aiogram.utils.deep_linking import get_start_link
 from aiogram.types.update import AllowedUpdates
 
 
-from loader import dp, bot
+from loader import dp, bot, db
 from keyboards.inline.addchan import AddChan
 from states.state import MessageState
 from states.add import AddState
@@ -18,46 +18,39 @@ from states.add import AddState
 
 @dp.message_handler(commands=['addChan'])
 async def addChan(message: types.Message, state: FSMContext):
-    await message.answer('Ushbu pastdagi tugmani bosib kanalingizga obuna qilishingiz mumkin!', reply_markup=AddChan)
+    text = 'Iltimos botni kanalingiz yoki gruhingizga admin sifatida obuna qiling va kanalingizdan istalgan birorta habarni forward qilib tashlang, agar gruh bo\'lsa shart emas!'
+    await message.answer(text)
     
     user_id = message.from_user.id
+    
     
     async with state.proxy() as data:
         data['user_id'] = user_id
         
-    print(bot.get_updates(allowed_updates=AllowedUpdates.MESSAGE + AllowedUpdates.EDITED_MESSAGE))
-        
-    
-    # await message.answer('Iltimos kanalingizdan biror habar yuboring!')
-    
-    
-@dp.callback_query_handler(text='http://t.me/devboysbot?startchannel=new')
-async def send_forward_post(message: types.Message):
-    
-    await message.answer('Iltimos kanalingizdan biror habar yuboring!')
     
     await AddState.chan_id.set()
-
+      
 
 @dp.message_handler(state=AddState.chan_id)
-async def get_chan_forward(message: types.Message):
+async def get_chan_forward(message: types.Message, state: FSMContext):
     chan_id = message.forward_from_chat.id
-    print(chan_id)
-
     
-@dp.message_handler(IsChannel(), content_types=types.ContentType.NEW_CHAT_MEMBERS)
-async def new_member(message: types.Message):
-    print(message.chat_id)
-    for member in message.new_chat_members:
-        if member.username == 'devboysbot':
-            print(f'{member.id} - - qoshdi!')
+    async with state.proxy() as data:
+        data['chan_id'] = chan_id
+        
+    await state.finish()
+    
+    await db.
+    
             
 
 @dp.message_handler(IsGroup(), content_types=types.ContentType.NEW_CHAT_MEMBERS)
-async def new_grmember(message: types.Message):
+async def new_grmember(message: types.Message, state: FSMContext):
     for member in message.new_chat_members:
         if member.username == 'devboysbot':
             print(f'Gruhga {member.id}, {member.username} -- qoshildi')
+            
+    await state.finish()
 
 
 @dp.message_handler(commands=['send_message'])
